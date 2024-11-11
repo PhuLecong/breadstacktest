@@ -1,0 +1,6 @@
+To run Robot Framework script:
+1. install Python 3.12.6
+2. python -m venv venv
+3. .\venv\Scripts\activate.bat
+4. pip install -r requirements.txt
+5. robot tests\UIAutomationTest.robot

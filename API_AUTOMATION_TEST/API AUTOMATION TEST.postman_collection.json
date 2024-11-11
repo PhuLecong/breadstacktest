@@ -1,0 +1,327 @@
+{
+	"info": {
+		"_postman_id": "dd07f269-edc4-4d9a-b958-f3ccca67d2ba",
+		"name": "API AUTOMATION TEST",
+		"description": "The **API Automation Test** collection in Postman is designed to validate a comprehensive workflow for managing users, products, orders, and reviews in a sample e-commerce API. The collection consists of a series of requests, each testing various aspects of API functionality. This includes input validation, response structure, and dynamic data handling through environment variables.\n\n#### Collection Structure\n\n1. **Create User**:\n    \n    - **Request**: Creates a new user by submitting `username`, `email`, and `password` in the request body.\n        \n    - **Tests**: Verifies a `201 Created` status, checks that the returned `username` and `email` match the input values, and saves the user ID in a collection variable (`userId`) for future requests.\n        \n2. **Get Category ID**:\n    \n    - **Request**: Retrieves the category ID for a specified category name (e.g., \"Electronics\").\n        \n    - **Tests**: Checks for a `200 OK` status, validates that the category name in the response matches the expected name, and stores the `categoryId` in a collection variable for product search.\n        \n3. **Search Products**:\n    \n    - **Request**: Searches for products within a specific category using the `categoryId`.\n        \n    - **Tests**: Ensures a `200 OK` status, verifies that the `categoryId` in the response matches the stored value, and sets the `productId` for future requests.\n        \n4. **Order**:\n    \n    - **Request**: Places an order for a specific product and quantity, using `userId` and `productId`.\n        \n    - **Tests**: Confirms a `201 Created` status, checks that the `userId` and `productId` in the response align with the values from previous steps, and stores the order ID.\n        \n5. **Review**:\n    \n    - **Request**: Submits a review for a product, including `userId`, `productId`, rating, and comment.\n        \n    - **Tests**: Validates a `201 Created` status, ensures that the review details (e.g., rating, comment) match expected values, and saves the review comment ID.\n        \n\n#### Key Features\n\n- **Dynamic Data Handling**: Uses collection variables (e.g., `userId`, `categoryId`, `productId`) to pass data between requests, simulating real user flows.\n    \n- **Extensive Validation**: Each request includes tests to validate HTTP status codes, response data, and ensures consistency with expected values.\n    \n- **Error Handling**: Additional tests for missing or invalid data could be added to extend robustness in handling edge cases.\n    \n\nThis Postman collection offers a robust foundation for API automation testing in an e-commerce context, with clear validations, data consistency checks, and dynamic data management, making it ideal for continuous integration environments.\n\nEndFragment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30218106"
+	},
+	"item": [
+		{
+			"name": "Create user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"     \r",
+							"    const jsonResponse = pm.response.json();\r",
+							"    const expectedUsername = pm.collectionVariables.get(\"username\");\r",
+							"    const expectedEmail = pm.collectionVariables.get(\"email\");\r",
+							"\r",
+							"    pm.expect(jsonResponse.username).to.eql(expectedUsername);\r",
+							"    pm.expect(jsonResponse.email).to.eql(expectedEmail);\r",
+							"});\r",
+							"pm.collectionVariables.set('userId', pm.response.json().id)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"new_password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{BASE_URL}}/users",
+					"protocol": "http",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get category Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    \r",
+							"    const jsonResponse = pm.response.json()[0];\r",
+							"    const expectedcategoryName = pm.collectionVariables.get(\"categoryName\");\r",
+							"    pm.expect(jsonResponse.name).to.eql(expectedcategoryName);\r",
+							"});\r",
+							"pm.collectionVariables.set('categoryId', pm.response.json()[0].id)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{BASE_URL}}/categories?name={{categoryName}}",
+					"protocol": "http",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"categories"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "{{categoryName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"    const jsonResponse = pm.response.json()[0];\r",
+							"    const expectedCategoryId = pm.collectionVariables.get(\"categoryId\");\r",
+							"    pm.expect(jsonResponse.categoryId).to.eql(expectedCategoryId);\r",
+							"});\r",
+							"pm.collectionVariables.set('productId', pm.response.json()[0].id)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{BASE_URL}}/products?categoryId={{categoryId}}",
+					"protocol": "http",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "categoryId",
+							"value": "{{categoryId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"\r",
+							"    \r",
+							"    const jsonResponse = pm.response.json();\r",
+							"    const expectedProductId = pm.collectionVariables.get(\"productId\");\r",
+							"    const expectedUserId = pm.collectionVariables.get(\"userId\");\r",
+							"    pm.expect(jsonResponse.userId).to.eql(expectedUserId);\r",
+							"    pm.expect(jsonResponse.items[0].productId).to.eql(expectedProductId);\r",
+							"    pm.expect(jsonResponse.items[0].quantity).to.eql(1);\r",
+							"});\r",
+							"pm.collectionVariables.set('orderId', pm.response.json().orders)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{userId}},\r\n    \"status\": \"ordered\",\r\n    \"items\": [\r\n        {\r\n            \"productId\": {{productId}},\r\n            \"quantity\": 1\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{BASE_URL}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Review",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"\r",
+							"    \r",
+							"    const jsonResponse = pm.response.json();\r",
+							"    const expectedProductId = pm.collectionVariables.get(\"productId\");\r",
+							"    const expectedUserId = pm.collectionVariables.get(\"userId\");\r",
+							"    const expectedComment = pm.collectionVariables.get(\"comment\");\r",
+							"    const expectedRating = parseInt(pm.collectionVariables.get(\"rating\"), 10);\r",
+							"    pm.expect(jsonResponse.userId).to.eql(expectedUserId);\r",
+							"    pm.expect(jsonResponse.productId).to.eql(expectedProductId);\r",
+							"    pm.expect(jsonResponse.rating).to.eql(expectedRating);\r",
+							"    pm.expect(jsonResponse.comment).to.eql(expectedComment);\r",
+							"});\r",
+							"pm.collectionVariables.set('commentId', pm.response.json().commentId)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{userId}},\r\n    \"productId\": {{productId}},\r\n    \"rating\": {{rating}},\r\n    \"comment\": \"{{comment}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{BASE_URL}}/reviews",
+					"protocol": "http",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "trump47",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "trump47@example.com",
+			"type": "string"
+		},
+		{
+			"key": "categoryName",
+			"value": "Electronics"
+		},
+		{
+			"key": "comment",
+			"value": "Very good, but could be better.",
+			"type": "string"
+		},
+		{
+			"key": "rating",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "categoryId",
+			"value": ""
+		},
+		{
+			"key": "productId",
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		},
+		{
+			"key": "commentId",
+			"value": ""
+		}
+	]
+}

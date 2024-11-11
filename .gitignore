@@ -1,0 +1,4 @@
+UI_AUTOMATION_TEST/venv/*
+*.pyc
+*.html
+*.xml
